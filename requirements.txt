@@ -4,5 +4,6 @@ Flask-Migrate
 Flask-SQLAlchemy
 SQLAlchemy
 Werkzeug
+flask_jwt_extended
 gunicorn
-gunicorn
+
