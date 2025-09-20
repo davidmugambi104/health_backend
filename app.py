@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from extension import db
 from models import User
 from routes import api
+from flask_cors import CORS
 import os
 
 app = Flask(__name__)
@@ -17,6 +18,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize extensions
 db.init_app(app)
+CORS(app, origins=["http://localhost:5173"])
 jwt = JWTManager(app)
 migrate = Migrate(app, db)
 

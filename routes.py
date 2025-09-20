@@ -169,28 +169,35 @@ def dashboard_doctors():
 def get_all_patients():
     try:
         patients = Patient.query.all()
-        return jsonify([{
-            'id': patient.patient_id,
-            'name': patient.name,
-            'email': patient.email,
-            'phone': patient.phone,
-            'date_of_birth': patient.date_of_birth.isoformat(),
-            'gender': patient.gender,
-            'blood_type': patient.blood_type,
-            'allergies': patient.allergies,
-            'current_medications': patient.current_medications,
-            'insurance_provider': patient.insurance_provider,
-            'policy_number': patient.policy_number,
-            'emergency_contact': patient.emergency_contact,
-            'in_icu': patient.in_icu,
-            'on_ventilator': patient.on_ventilator,
-            'isolation_status': patient.isolation_status,
-            'telemedicine_ready': patient.telemedicine_ready,
-            'is_active': patient.is_active
-        } for patient in patients])
+        return jsonify([
+            {
+                'id': patient.patient_id,
+                'first_name': patient.first_name,
+                'last_name': patient.last_name,
+                'name': f"{patient.first_name} {patient.last_name}",
+                'email': patient.email,
+                'phone': patient.phone,
+                'date_of_birth': patient.date_of_birth.isoformat(),
+                'age': patient.age,
+                'gender': patient.gender,
+                'blood_type': patient.blood_type,
+                'allergies': patient.allergies,
+                'current_medications': patient.current_medications,
+                'insurance_provider': patient.insurance_provider,
+                'policy_number': patient.policy_number,
+                'emergency_contact': patient.emergency_contact,
+                'in_icu': patient.in_icu,
+                'on_ventilator': patient.on_ventilator,
+                'isolation_status': patient.isolation_status,
+                'telemedicine_ready': patient.telemedicine_ready,
+                'is_active': patient.is_active,
+                'registered': patient.created_at.strftime('%b %d, %Y') if patient.created_at else None
+            } for patient in patients
+        ])
     except Exception as e:
         logging.error(f"Error fetching patients: {str(e)}")
         return jsonify({'success': False, 'message': 'Failed to fetch patients'}), 500
+
 
 @api.route('/patients', methods=['POST'])
 def add_patient():
@@ -237,11 +244,14 @@ def add_patient():
             'success': True,
             'patient': {
                 'id': patient.patient_id,
-                'name': patient.name,
-                'status': 'active',
+                'first_name': patient.first_name,
+                'last_name': patient.last_name,
+                'name': f"{patient.first_name} {patient.last_name}",
+                'email': patient.email,
+                'phone': patient.phone,
+                'date_of_birth': patient.date_of_birth.isoformat(),
                 'age': patient.age,
                 'gender': patient.gender,
-                'contact': patient.email,
                 'registered': patient.created_at.strftime('%b %d, %Y'),
                 'conditions': [],
                 'lastVisit': 'Never'
@@ -254,7 +264,8 @@ def add_patient():
         logging.error(f"Error creating patient: {str(e)}")
         db.session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 500
-    
+
+
 @api.route('/patients/<patient_id>')
 def get_patient(patient_id):
     patient = Patient.query.filter_by(patient_id=patient_id).first_or_404()
@@ -272,12 +283,13 @@ def get_patient(patient_id):
     
     return jsonify({
         'id': patient.patient_id,
-        'name': patient.name,
         'first_name': patient.first_name,
         'last_name': patient.last_name,
+        'name': f"{patient.first_name} {patient.last_name}",
         'email': patient.email,
         'phone': patient.phone,
         'date_of_birth': patient.date_of_birth.isoformat(),
+        'age': patient.age,
         'gender': patient.gender,
         'blood_type': patient.blood_type,
         'allergies': patient.allergies,
@@ -285,6 +297,7 @@ def get_patient(patient_id):
         'insurance_provider': patient.insurance_provider,
         'policy_number': patient.policy_number,
         'emergency_contact': patient.emergency_contact,
+        'registered': patient.created_at.strftime('%b %d, %Y') if patient.created_at else None,
         'conditions': conditions,
         'appointments': [{
             'id': appt.id,
